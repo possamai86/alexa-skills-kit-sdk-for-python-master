@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+# Don't run tests from the root repo dir.
+# We want to ensure we're importing from the installed
+# binary package not from the CWD.
+
+import os
+import sys
+from subprocess import check_call
+
+_dname = os.path.dirname
+
+sdk_packages = [
+    "ask-sdk-core", "ask-sdk-runtime",
+    "ask-sdk-dynamodb-persistence-adapter", "ask-sdk",
+    "ask-sdk-webservice-support", "flask-ask-sdk",
+    "ask-sdk-s3-persistence-adapter", "ask-sdk-jinja-renderer",
+    "ask-smapi-sdk"]
+
+if sys.version_info.major == 3:
+    sdk_packages.extend(["django-ask-sdk", "ask-sdk-local-debug"])
+
+REPO_ROOT = _dname(_dname(_dname(os.path.abspath(__file__))))
+
+for pkg in sdk_packages:
+    os.chdir(os.path.join(REPO_ROOT, pkg))
+    if pkg == "ask-sdk-dynamodb-persistence-adapter":
+        pip_pkg_name = "ask_sdk_dynamodb"
+    elif pkg == "ask-sdk-s3-persistence-adapter":
+        pip_pkg_name = "ask_sdk_s3"
+    else:
+        pip_pkg_name = pkg.replace("-", "_")
+    check_call(
+        ['nosetests', 'tests', '--with-coverage', '--cover-inclusive', '--cover-erase',
+         '--cover-package', pip_pkg_name], shell=True)

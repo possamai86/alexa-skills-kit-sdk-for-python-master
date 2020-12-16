@@ -1,0 +1,10 @@
+sphinx
+sphinx_rtd_theme
+sphinx_tabs
+
+python-dateutil==2.8.0
+ask-sdk-model-runtime
+ask-sdk-webservice-support
+flask-ask-sdk
+django-ask-sdk
+ask-smapi-sdk

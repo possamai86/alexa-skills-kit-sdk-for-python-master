@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+import os
+from subprocess import check_call
+import shutil
+import sys
+
+_dname = os.path.dirname
+
+REPO_ROOT = _dname(_dname(_dname(os.path.abspath(__file__))))
+
+
+def run(command):
+    return check_call(command, shell=True)
+
+sdk_packages = [
+    "ask-sdk-runtime", "ask-sdk-core",
+    "ask-sdk-dynamodb-persistence-adapter", "ask-sdk",
+    "ask-sdk-webservice-support", "flask-ask-sdk",
+    "ask-sdk-jinja-renderer", "ask-sdk-s3-persistence-adapter",
+    "ask-smapi-sdk"]
+
+if sys.version_info.major == 3:
+    sdk_packages.extend(["django-ask-sdk", "ask-sdk-local-debug"])
+
+run("pip install coverage")
+
+for pkg in sdk_packages:
+    os.chdir(os.path.join(REPO_ROOT, pkg))
+    run("pip install -r requirements.txt")
+    if os.path.isdir('dist') and os.listdir('dist'):
+        shutil.rmtree('dist')
+    run('python setup.py bdist_wheel')
+    wheel_dist = os.listdir('dist')[0]
+    run('pip install %s' % (os.path.join('dist', wheel_dist)))
